@@ -1,0 +1,37 @@
+{{- $gs := $.Page.Scratch  -}}
+{{- $s  := newScratch -}}
+
+{{- $cs := ($gs.Get "dye_cloors" | default (slice "#F03" "#FF0" "#06C" "#F90" "#ee2" "#0f4" "#4ff")) -}}
+{{- $idx := ($gs.Get "dye_idx" | default 0) -}}
+
+{{- if eq (len .Params) 0 -}}
+  {{- $s.Set "bl_tc" ( index $cs (mod $idx (len $cs))) -}}
+  {{- $gs.Set "dye_idx" (add $idx 1) -}}
+{{- else -}}
+  {{- if and (eq (len .Params) 1) (hasPrefix (.Get 0) "-") -}}
+    {{- range ( split (strings.TrimPrefix "-" (.Get 0)) "") -}}
+      {{- if eq . "a" -}}
+        {{- $s.Set "bl_tc" ( index $cs (mod (sub $idx 1) (len $cs))) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- else if .IsNamedParams -}}
+    {{- if isset .Params "class" -}}
+      {{- $s.Set "class" (.Get "class") -}}
+    {{- else -}}
+      {{- $s.Set "bl_tc" (.Get "tc") -}}
+      {{- $s.Set "bl_bc" (.Get "bc") -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $s.Set "bl_tc" (.Get 0) -}}
+    {{- $s.Set "bl_bc" (.Get 1) -}}
+  {{- end -}}
+{{- end -}}
+<span id="dye-{{.Ordinal}}"
+  idx="{{$idx}}"
+{{- if $s.Get "class"}}{{with $s.Get "class" }} class="{{ . }}" {{end -}}
+{{- else -}}style="
+  {{- with $s.Get "bl_tc" }}color:{{.}};{{end -}}
+  {{- with $s.Get "bl_bc" }}background-color:{{.}};{{end -}}
+"
+{{- end -}}
+>{{.Inner}}</span>
